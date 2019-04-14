@@ -1,0 +1,11 @@
+#!/bin/bash -e
+
+if ! git remote | grep -x bert; then
+    git remote add bert git@github.com:muennich/sxiv.git
+fi
+
+# back up, since we are rewriting history
+git branch "$(date +%Y%m%d%H%M%S%N)"
+
+git fetch -p bert
+git rebase -p bert/master
