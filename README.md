@@ -1,3 +1,12 @@
+Changes
+-------
+
+My changes are mostly geared towards using sxiv as a photo organiser.
+
+* Don't repan images on navigation
+
+Original
+--------
 ![sxiv](http://muennich.github.com/sxiv/img/logo.png "sxiv")
 
 **Simple X Image Viewer**
