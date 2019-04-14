@@ -61,7 +61,11 @@ bool cg_quit(arg_t _)
 			if (files[i].flags & FF_MARK)
 				printf("%s\n", files[i].name);
 		}
+	} else if (markcnt > 0) {
+		/* refuse to quit with marks active */
+		return false;
 	}
+
 	exit(EXIT_SUCCESS);
 }
 
