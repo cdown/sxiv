@@ -54,7 +54,11 @@ bool cg_quit(arg_t status)
 			if (files[i].flags & FF_MARK)
 				printf("%s%c", files[i].name, options->using_null ? '\0' : '\n');
 		}
+	} else if (markcnt > 0) {
+		/* refuse to quit with marks active */
+		return false;
 	}
+
 	exit(status);
 	return None; /* silence tcc warning */
 }
