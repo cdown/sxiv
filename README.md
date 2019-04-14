@@ -6,6 +6,7 @@ My changes are mostly geared towards using sxiv as a photo organiser.
 
 * Don't repan images on navigation
 * Set minimum zoom level very low in order to always respect e/W
+* Use 64x64 thumbs by default
 
 Use the `sync` script to rebase on upstream.
 
