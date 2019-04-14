@@ -6,6 +6,8 @@ My changes are mostly geared towards using sxiv as a photo organiser.
 
 * Don't repan images on navigation
 
+Use the `sync` script to rebase on upstream.
+
 Original
 --------
 
