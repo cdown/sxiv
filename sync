@@ -1,11 +1,18 @@
 #!/bin/bash -e
 
-if ! git remote | grep -x bert; then
+if ! git remote | grep -qx bert; then
     git remote add bert git@github.com:muennich/sxiv.git
 fi
 
-# back up, since we are rewriting history
-git branch "$(date +%Y%m%d%H%M%S%N)"
-
 git fetch -p bert
-git rebase -p bert/master
+
+old_base=$(git merge-base master bert/master)
+new_base=$(git rev-parse bert/master)
+
+if [[ "$old_base" == "$new_base" ]]; then
+    printf '%s\n' "No new changes upstream" >&2
+else
+    # back up, since we are rewriting history
+    git branch "$(date +%Y%m%d%H%M%S%N)"
+    git rebase -r bert/master
+fi
