@@ -31,6 +31,7 @@
 #include <sys/stat.h>
 #include <sys/wait.h>
 #include <time.h>
+#include <Imlib2.h>
 #include <X11/keysym.h>
 #include <X11/XF86keysym.h>
 
@@ -52,6 +53,10 @@ arl_t arl;
 img_t img;
 tns_t tns;
 win_t win;
+
+Imlib_Image next_img;
+int next_img_idx;
+int last_img_idx;
 
 fileinfo_t *files;
 int filecnt, fileidx;
@@ -285,13 +290,35 @@ end:
 	close_info();
 }
 
+void cache_next_image(int new) {
+	if (new < 0 || new >= filecnt)
+		return;
+
+	if ((next_img = img_open(&files[new])))
+		next_img_idx = new;
+	else
+		next_img_idx = -1;
+}
+
+bool img_load_try_cache(int new) {
+	if (new == next_img_idx && new >= 0) {
+		img_load_cache(&img, &files[new], &next_img);
+		return true;
+	}
+
+	return img_load(&img, &files[new]);
+}
+
 void load_image(int new)
 {
 	bool prev = new < fileidx;
+	int diff = new - last_img_idx;
 	static int current;
 
 	if (new < 0 || new >= filecnt)
 		return;
+
+	last_img_idx = new;
 
 	if (win.xwin != None)
 		win_set_cursor(&win, CURSOR_WATCH);
@@ -301,7 +328,7 @@ void load_image(int new)
 		alternate = current;
 
 	img_close(&img, false);
-	while (!img_load(&img, &files[new])) {
+	while (!img_load_try_cache(new)) {
 		remove_file(new, false);
 		if (new >= filecnt)
 			new = filecnt - 1;
@@ -319,6 +346,9 @@ void load_image(int new)
 		set_timeout(animate, img.multi.frames[img.multi.sel].delay, true);
 	else
 		reset_timeout(animate);
+
+	if (diff)
+		cache_next_image(new + diff);
 }
 
 bool mark_image(int n, bool on)
@@ -852,7 +882,8 @@ int main(int argc, char **argv)
 
 	files = emalloc(filecnt * sizeof(*files));
 	memset(files, 0, filecnt * sizeof(*files));
-	fileidx = 0;
+	last_img_idx = fileidx = 0;
+	next_img_idx = -1;
 
 	if (options->from_stdin) {
 		n = 0;
