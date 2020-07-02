@@ -315,11 +315,16 @@ Imlib_Image img_open(const fileinfo_t *file)
 	return im;
 }
 
-bool img_load(img_t *img, const fileinfo_t *file)
+bool img_load_cache(img_t *img, const fileinfo_t *file, Imlib_Image *ii)
 {
 	const char *fmt;
 
-	if ((img->im = img_open(file)) == NULL)
+	if (ii)
+		img->im = ii;
+	else
+		img->im = img_open(file);
+
+	if (img->im == NULL)
 		return false;
 
 	imlib_image_set_changes_on_disk();
@@ -346,6 +351,8 @@ CLEANUP void img_close(img_t *img, bool decache)
 {
 	int i;
 
+	printf("closing %p...\n", (void *)img);
+
 	if (img->multi.cnt > 0) {
 		for (i = 0; i < img->multi.cnt; i++) {
 			imlib_context_set_image(img->multi.frames[i].im);
@@ -361,6 +368,11 @@ CLEANUP void img_close(img_t *img, bool decache)
 			imlib_free_image();
 		img->im = NULL;
 	}
+}
+
+bool img_load(img_t *img, const fileinfo_t *file)
+{
+	return img_load_cache(img, file, NULL);
 }
 
 void img_check_pan(img_t *img, bool moved)

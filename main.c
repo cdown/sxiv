@@ -31,6 +31,7 @@
 #include <sys/stat.h>
 #include <sys/wait.h>
 #include <time.h>
+#include <Imlib2.h>
 #include <X11/keysym.h>
 #include <X11/XF86keysym.h>
 
@@ -53,8 +54,9 @@ img_t img;
 tns_t tns;
 win_t win;
 
-img_t next_img;
+Imlib_Image next_img;
 int next_img_idx;
+int last_img_idx;
 
 fileinfo_t *files;
 int filecnt, fileidx;
@@ -98,6 +100,7 @@ cursor_t imgcursor[3] = {
 
 void cleanup(void)
 {
+	printf("%d\n", __LINE__);
 	img_close(&img, false);
 	arl_cleanup(&arl);
 	tns_free(&tns);
@@ -292,16 +295,16 @@ void cache_next_image(int new) {
 	if (new < 0 || new >= filecnt)
 		return;
 
-	img_close(&next_img, false);
-	if (img_load(&next_img, &files[new + 1]))
-		next_img_idx = new + 1;
+	if ((next_img = img_open(&files[new])))
+		next_img_idx = new;
 	else
 		next_img_idx = -1;
 }
 
 bool img_load_try_cache(int new) {
 	if (new == next_img_idx && new >= 0) {
-		img = next_img;
+		printf("hit cache\n");
+		img_load_cache(&img, &files[new], &next_img);
 		return true;
 	}
 
@@ -311,10 +314,13 @@ bool img_load_try_cache(int new) {
 void load_image(int new)
 {
 	bool prev = new < fileidx;
+	int diff = new - last_img_idx;
 	static int current;
 
 	if (new < 0 || new >= filecnt)
 		return;
+
+	last_img_idx = new;
 
 	if (win.xwin != None)
 		win_set_cursor(&win, CURSOR_WATCH);
@@ -323,6 +329,7 @@ void load_image(int new)
 	if (new != current)
 		alternate = current;
 
+	printf("%d\n", __LINE__);
 	img_close(&img, false);
 	while (!img_load_try_cache(new)) {
 		remove_file(new, false);
@@ -343,7 +350,8 @@ void load_image(int new)
 	else
 		reset_timeout(animate);
 
-	cache_next_image(new);
+	if (diff)
+		cache_next_image(new + diff);
 }
 
 bool mark_image(int n, bool on)
@@ -579,6 +587,7 @@ void run_key_handler(const char *key, unsigned int mask)
 end:
 	if (mode == MODE_IMAGE) {
 		if (changed) {
+	printf("%d\n", __LINE__);
 			img_close(&img, true);
 			load_image(fileidx);
 		} else {
@@ -755,6 +764,7 @@ void run(void)
 					if (arl_handle(&arl)) {
 						/* when too fast, imlib2 can't load the image */
 						nanosleep(&ten_ms, NULL);
+	printf("%d\n", __LINE__);
 						img_close(&img, true);
 						load_image(fileidx);
 						redraw();
@@ -877,7 +887,7 @@ int main(int argc, char **argv)
 
 	files = emalloc(filecnt * sizeof(*files));
 	memset(files, 0, filecnt * sizeof(*files));
-	fileidx = 0;
+	last_img_idx = fileidx = 0;
 	next_img_idx = -1;
 
 	if (options->from_stdin) {
@@ -932,7 +942,6 @@ int main(int argc, char **argv)
 
 	win_init(&win);
 	img_init(&img, &win);
-	next_img = img;
 	arl_init(&arl);
 
 	if ((homedir = getenv("XDG_CONFIG_HOME")) == NULL || homedir[0] == '\0') {
