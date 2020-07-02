@@ -53,6 +53,9 @@ img_t img;
 tns_t tns;
 win_t win;
 
+img_t next_img;
+int next_img_idx;
+
 fileinfo_t *files;
 int filecnt, fileidx;
 int alternate;
@@ -285,6 +288,26 @@ end:
 	close_info();
 }
 
+void cache_next_image(int new) {
+	if (new < 0 || new >= filecnt)
+		return;
+
+	img_close(&next_img, false);
+	if (img_load(&next_img, &files[new + 1]))
+		next_img_idx = new + 1;
+	else
+		next_img_idx = -1;
+}
+
+bool img_load_try_cache(int new) {
+	if (new == next_img_idx && new >= 0) {
+		img = next_img;
+		return true;
+	}
+
+	return img_load(&img, &files[new]);
+}
+
 void load_image(int new)
 {
 	bool prev = new < fileidx;
@@ -301,7 +324,7 @@ void load_image(int new)
 		alternate = current;
 
 	img_close(&img, false);
-	while (!img_load(&img, &files[new])) {
+	while (!img_load_try_cache(new)) {
 		remove_file(new, false);
 		if (new >= filecnt)
 			new = filecnt - 1;
@@ -319,6 +342,8 @@ void load_image(int new)
 		set_timeout(animate, img.multi.frames[img.multi.sel].delay, true);
 	else
 		reset_timeout(animate);
+
+	cache_next_image(new);
 }
 
 bool mark_image(int n, bool on)
@@ -853,6 +878,7 @@ int main(int argc, char **argv)
 	files = emalloc(filecnt * sizeof(*files));
 	memset(files, 0, filecnt * sizeof(*files));
 	fileidx = 0;
+	next_img_idx = -1;
 
 	if (options->from_stdin) {
 		n = 0;
@@ -906,6 +932,7 @@ int main(int argc, char **argv)
 
 	win_init(&win);
 	img_init(&img, &win);
+	next_img = img;
 	arl_init(&arl);
 
 	if ((homedir = getenv("XDG_CONFIG_HOME")) == NULL || homedir[0] == '\0') {
