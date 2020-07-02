@@ -319,10 +319,12 @@ bool img_load_cache(img_t *img, const fileinfo_t *file, Imlib_Image *ii)
 {
 	const char *fmt;
 
-	if (ii)
-		img->im = ii;
-	else
+	if (ii) {
+		img->im = *ii;
+		imlib_context_set_image(img->im);
+	} else {
 		img->im = img_open(file);
+	}
 
 	if (img->im == NULL)
 		return false;
@@ -350,8 +352,6 @@ bool img_load_cache(img_t *img, const fileinfo_t *file, Imlib_Image *ii)
 CLEANUP void img_close(img_t *img, bool decache)
 {
 	int i;
-
-	printf("closing %p...\n", (void *)img);
 
 	if (img->multi.cnt > 0) {
 		for (i = 0; i < img->multi.cnt; i++) {

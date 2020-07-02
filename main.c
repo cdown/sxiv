@@ -100,7 +100,6 @@ cursor_t imgcursor[3] = {
 
 void cleanup(void)
 {
-	printf("%d\n", __LINE__);
 	img_close(&img, false);
 	arl_cleanup(&arl);
 	tns_free(&tns);
@@ -303,7 +302,6 @@ void cache_next_image(int new) {
 
 bool img_load_try_cache(int new) {
 	if (new == next_img_idx && new >= 0) {
-		printf("hit cache\n");
 		img_load_cache(&img, &files[new], &next_img);
 		return true;
 	}
@@ -329,7 +327,6 @@ void load_image(int new)
 	if (new != current)
 		alternate = current;
 
-	printf("%d\n", __LINE__);
 	img_close(&img, false);
 	while (!img_load_try_cache(new)) {
 		remove_file(new, false);
@@ -587,7 +584,6 @@ void run_key_handler(const char *key, unsigned int mask)
 end:
 	if (mode == MODE_IMAGE) {
 		if (changed) {
-	printf("%d\n", __LINE__);
 			img_close(&img, true);
 			load_image(fileidx);
 		} else {
@@ -764,7 +760,6 @@ void run(void)
 					if (arl_handle(&arl)) {
 						/* when too fast, imlib2 can't load the image */
 						nanosleep(&ten_ms, NULL);
-	printf("%d\n", __LINE__);
 						img_close(&img, true);
 						load_image(fileidx);
 						redraw();
