@@ -8,6 +8,7 @@ using sxiv as a photo organiser.
 * Set minimum zoom level very low in order to always respect e/W
 * Use 64x64 thumbs by default
 * Refuse to quit with marks active (unless `options->to_stdout` is set)
+* m/M directly mark/unmark
 
 Use the `sync` script to rebase on upstream.
 
