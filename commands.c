@@ -173,6 +173,16 @@ bool cg_zoom(arg_t d)
 		return img_zoom(&img, d);
 }
 
+bool cg_image_mark(arg_t _)
+{
+	return mark_image(fileidx, true);
+}
+
+bool cg_image_unmark(arg_t _)
+{
+	return mark_image(fileidx, false);
+}
+
 bool cg_toggle_image_mark(arg_t _)
 {
 	return mark_image(fileidx, !(files[fileidx].flags & FF_MARK));
