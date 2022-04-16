@@ -4,15 +4,20 @@ if ! git remote | grep -qx bert; then
     git remote add bert git@github.com:muennich/sxiv.git
 fi
 
-git fetch -p bert
+if ! git remote | grep -qx nsxiv; then
+    git remote add nsxiv git@github.com:nsxiv/nsxiv.git
+fi
 
-old_base=$(git merge-base master bert/master)
-new_base=$(git rev-parse bert/master)
+git fetch -p bert
+git fetch -p nsxiv
+
+old_base=$(git merge-base master nsxiv/master)
+new_base=$(git rev-parse nsxiv/master)
 
 if [[ "$old_base" == "$new_base" ]]; then
     printf '%s\n' "No new changes upstream" >&2
 else
     # back up, since we are rewriting history
     git branch "$(date +%Y%m%d%H%M%S%N)"
-    git rebase --committer-date-is-author-date -r bert/master
+    git rebase --committer-date-is-author-date -r nsxiv/master
 fi
