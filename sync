@@ -5,7 +5,7 @@ if ! git remote | grep -qx bert; then
 fi
 
 if ! git remote | grep -qx nsxiv; then
-    git remote add nsxiv git@github.com:nsxiv/nsxiv.git
+    git remote add nsxiv https://codeberg.org/nsxiv/nsxiv.git
 fi
 
 git fetch -p bert
