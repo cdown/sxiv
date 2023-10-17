@@ -44,7 +44,7 @@ static const double BRIGHTNESS_MAX  = 2.0;
 static const double CONTRAST_MAX    = 4.0;
 
 /* command i_scroll pans image 1/PAN_FRACTION of screen width/height */
-static const int PAN_FRACTION = 5;
+static const int PAN_FRACTION = 10;
 
 /* percentage of memory to use for imlib2's cache size.
  *   3 means use 3% of total memory which is about 245MiB on 8GiB machine.
