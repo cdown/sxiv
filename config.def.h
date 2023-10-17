@@ -54,9 +54,9 @@ static const int PAN_FRACTION = 10;
  * NOTE: higher cache size means better image reloading performance, but also
  * higher memory usage.
  */
-static const int CACHE_SIZE_MEM_PERCENTAGE = 3;          /* use 3% of total memory for cache */
-static const int CACHE_SIZE_LIMIT = 256 * 1024 * 1024;   /* but not above 256MiB */
-static const int CACHE_SIZE_FALLBACK = 32 * 1024 * 1024; /* fallback to 32MiB if we can't determine total memory */
+static const int CACHE_SIZE_MEM_PERCENTAGE = 10;          /* use 10% of total memory for cache */
+static const int CACHE_SIZE_LIMIT = 1024 * 1024 * 1024;   /* but not above 1GiB */
+static const int CACHE_SIZE_FALLBACK = 1024 * 1024 * 1024; /* fallback to 1GiB if we can't determine total memory */
 
 #endif
 #ifdef INCLUDE_OPTIONS_CONFIG
